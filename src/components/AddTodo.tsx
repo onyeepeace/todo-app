@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ENDPOINT } from "@/lib/constants";
 
 type FormData = {
   title: string;
@@ -28,13 +27,16 @@ const AddTodo = () => {
 
   const createTodo = useMutation({
     mutationFn: async (values: FormData) => {
-      const response = await fetch(`${ENDPOINT}/api/todos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}/api/todos`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to create todo");

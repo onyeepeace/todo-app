@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ENDPOINT, fetchTodos } from "@/lib/constants";
+import { fetchTodos } from "@/lib/constants";
 import AddTodo from "./AddTodo";
 import EditTodo from "./EditTodo";
 
@@ -26,13 +26,13 @@ const Todo = () => {
 
   const markTodoAsDone = useMutation<void, Error, number>({
     mutationFn: (id: number) =>
-      fetch(`${ENDPOINT}/api/todos/${id}/done`, { method: "PATCH" }).then(
-        (res) => {
-          if (!res.ok) {
-            throw new Error("Failed to mark todo as done");
-          }
+      fetch(`${import.meta.env.VITE_BASE_URL}/api/todos/${id}/done`, {
+        method: "PATCH",
+      }).then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to mark todo as done");
         }
-      ),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["todos"] });
     },
@@ -43,7 +43,9 @@ const Todo = () => {
 
   const deleteTodo = useMutation<void, Error, number>({
     mutationFn: (id: number) =>
-      fetch(`${ENDPOINT}/api/todos/${id}`, { method: "DELETE" }).then((res) => {
+      fetch(`${import.meta.env.VITE_BASE_URL}/api/todos/${id}`, {
+        method: "DELETE",
+      }).then((res) => {
         if (!res.ok) {
           throw new Error("Failed to delete todo");
         }
