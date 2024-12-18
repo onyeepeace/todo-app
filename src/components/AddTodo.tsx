@@ -20,7 +20,7 @@ type FormData = {
   body: string;
 };
 
-const AddTodo = () => {
+const AddTodo = ({ activeListId }: { activeListId: number }) => {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { register, handleSubmit, reset } = useForm<FormData>();
@@ -28,7 +28,7 @@ const AddTodo = () => {
   const createTodo = useMutation({
     mutationFn: async (values: FormData) => {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/todos`,
+        `${import.meta.env.VITE_BASE_URL}/api/lists/${activeListId}/todos`,
         {
           method: "POST",
           headers: {

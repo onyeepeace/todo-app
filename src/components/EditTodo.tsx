@@ -20,7 +20,13 @@ type FormData = {
   body: string;
 };
 
-const EditTodo = ({ todo }: { todo: Todo }) => {
+const EditTodo = ({
+  todo,
+  activeListId,
+}: {
+  todo: Todo;
+  activeListId: number;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { register, handleSubmit } = useForm({
@@ -33,7 +39,9 @@ const EditTodo = ({ todo }: { todo: Todo }) => {
   const updateTodo = useMutation({
     mutationFn: async (values: { title: string; body: string }) => {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/todos/${todo.id}`,
+        `${import.meta.env.VITE_BASE_URL}/api/lists/${activeListId}/todos/${
+          todo.todo_id
+        }`,
         {
           method: "PUT",
           headers: {
