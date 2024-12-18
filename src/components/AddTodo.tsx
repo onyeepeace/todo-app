@@ -46,7 +46,7 @@ const AddTodo = ({ activeListId }: { activeListId: number }) => {
       return responseBody ? JSON.parse(responseBody) : {};
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      queryClient.invalidateQueries({ queryKey: ["todos", activeListId] });
       reset();
       setIsOpen(false);
     },

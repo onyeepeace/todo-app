@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchTodos } from "@/lib/constants";
 import AddTodo from "./AddTodo";
 import EditTodo from "./EditTodo";
+import { SquareCheck } from "lucide-react";
 
 export interface Todo {
   todo_id: number;
@@ -40,7 +40,7 @@ const Todo = ({ activeListId }: { activeListId: number }) => {
         }
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      queryClient.invalidateQueries({ queryKey: ["todos", activeListId] });
     },
     onError: (error) => {
       console.error("Error marking todo as done:", error.message);
@@ -62,7 +62,7 @@ const Todo = ({ activeListId }: { activeListId: number }) => {
         }
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      queryClient.invalidateQueries({ queryKey: ["todos", activeListId] });
     },
     onError: (error) => {
       console.error("Error deleting todo:", error.message);
@@ -84,19 +84,19 @@ const Todo = ({ activeListId }: { activeListId: number }) => {
           ? todos.map((todo: Todo) => (
               <li
                 key={`todo_list__${todo.todo_id}`}
-                className="flex justify-between mb-4"
+                className="flex justify-between mb-4 gap-4"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-6 text-xl">
                   {todo.done ? (
-                    <CheckCircleIcon className="h-6 w-6 text-teal-500" />
+                    <SquareCheck className="text-teal-500 size-9" />
                   ) : (
                     <span onClick={() => markTodoAsDone.mutate(todo.todo_id)}>
-                      <CheckCircleIcon className="h-6 w-6 text-gray-500 cursor-pointer" />
+                      <SquareCheck className="text-gray-500 cursor-pointer size-9" />
                     </span>
                   )}
                   {todo.title}
                 </div>
-                <div>
+                <div className="flex gap-4">
                   <EditTodo todo={todo} activeListId={activeListId} />
                   <Button
                     onClick={() => deleteTodo.mutate(todo.todo_id)}

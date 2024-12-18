@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchLists, editList, deleteList, addList } from "@/lib/constants";
-import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
+import { ArrowUpSquare, Pencil, Plus, Trash2 } from "lucide-react";
 
-const Lists = ({ setActiveList }: { setActiveList: (id: number) => void }) => {
+const Lists = ({
+  setActiveList,
+  activeListId,
+}: {
+  setActiveList: (id: number) => void;
+  activeListId: number | null;
+}) => {
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    console.log("Lists component mounted");
-  }, []);
 
   const {
     data: lists,
@@ -55,10 +56,10 @@ const Lists = ({ setActiveList }: { setActiveList: (id: number) => void }) => {
 
   return (
     <div className="p-4">
-      <div className="mb-4 flex justify-between">
-        <h2>Lists</h2>
-        <Button
-          className="bg-gray-500"
+      <div className="mb-6 flex justify-between items-center">
+        <h1 className="font-bold text-2xl">Lists</h1>
+        <div
+          className=""
           onClick={() => {
             const name = prompt("Enter new list name:");
             if (name) {
@@ -66,38 +67,44 @@ const Lists = ({ setActiveList }: { setActiveList: (id: number) => void }) => {
             }
           }}
         >
-          Add List
-        </Button>
+          <Plus className="text-gray-800 cursor-pointer size-9" />
+        </div>
       </div>
-      <ul>
+      <ul className="flex flex-col gap-8">
         {lists.map((list: { list_id: number; name: string }) => {
           const listUrl = `${window.location.origin}/list/${list.list_id}`;
+          const isActive = list.list_id === activeListId;
           return (
             <li
               key={list.list_id}
-              className="flex justify-between items-center mb-2"
+              className={`flex justify-between items-center mb-2 border-2 border-gray-800 rounded-2xl p-4 text-xl ${
+                isActive ? "bg-blue-100" : ""
+              }`}
             >
-              <span onClick={() => setActiveList(list.list_id)}>
+              <span
+                className="cursor-pointer"
+                onClick={() => setActiveList(list.list_id)}
+              >
                 {list.name}
               </span>
-              <div>
-                <Button
-                  className="mr-2 bg-blue-500"
+              <div className="flex gap-4">
+                <div
+                  className=""
                   onClick={() => handleEdit(list.list_id, list.name)}
                 >
-                  Edit
-                </Button>
-                <Button
-                  className="bg-red-500"
+                  <Pencil className="text-blue-500 cursor-pointer size-7" />
+                </div>
+                <div
+                  className=""
                   onClick={() => deleteListMutation.mutate(list.list_id)}
                 >
-                  Delete
-                </Button>
-              </div>
-              <div>
-                <a href={listUrl} target="_blank" rel="noopener noreferrer">
-                  Shareable Link
-                </a>
+                  <Trash2 className="text-red-500 cursor-pointer size-7" />
+                </div>
+                <div>
+                  <a href={listUrl} target="_blank" rel="noopener noreferrer">
+                    <ArrowUpSquare className="text-gray-500 cursor-pointer size-7" />
+                  </a>
+                </div>
               </div>
             </li>
           );

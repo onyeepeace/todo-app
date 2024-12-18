@@ -58,7 +58,7 @@ const EditTodo = ({
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      queryClient.invalidateQueries({ queryKey: ["todos", activeListId] });
       setIsOpen(false);
     },
     onError: (error) => {
