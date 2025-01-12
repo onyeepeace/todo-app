@@ -1,13 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchLists, editList, deleteList, addList } from "@/lib/constants";
 import { ArrowUpSquare, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect } from "react";
 
 const Lists = ({
-  setActiveList,
   activeListId,
+  setActiveListId,
 }: {
-  setActiveList: (id: number) => void;
   activeListId: number | null;
+  setActiveListId: (id: number) => void;
 }) => {
   const queryClient = useQueryClient();
 
@@ -17,11 +18,15 @@ const Lists = ({
     isError,
   } = useQuery({
     queryKey: ["lists"],
-    queryFn: () => {
-      console.log("Fetching lists");
-      return fetchLists();
-    },
+    queryFn: fetchLists,
+    enabled: true,
   });
+
+  useEffect(() => {
+    if (lists && lists.length > 0 && activeListId === null) {
+      setActiveListId(lists[0].list_id);
+    }
+  }, [lists, activeListId, setActiveListId]);
 
   const addListMutation = useMutation({
     mutationFn: addList,
@@ -83,7 +88,7 @@ const Lists = ({
             >
               <span
                 className="cursor-pointer"
-                onClick={() => setActiveList(list.list_id)}
+                onClick={() => setActiveListId(list.list_id)}
               >
                 {list.name}
               </span>
