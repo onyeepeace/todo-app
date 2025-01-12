@@ -10,7 +10,6 @@ const GoogleLoginButton = () => {
   const googleLogin = useGoogleLogin({
     flow: "auth-code",
     onSuccess: async (codeResponse) => {
-      console.log("Auth code received:", codeResponse.code);
       try {
         const response = await fetch(
           `${import.meta.env.VITE_BASE_URL}/api/auth/callback?code=${
