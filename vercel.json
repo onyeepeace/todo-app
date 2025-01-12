@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://$RENDER_API_URL/$1"
+      "destination": "https://todo-api-fmho.onrender.com/$1"
     },
     { "source": "/(.*)", "destination": "/" }
   ]
