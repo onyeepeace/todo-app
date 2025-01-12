@@ -5,9 +5,8 @@
       "destination": "https://todo-api-fmho.onrender.com/:path*"
     },
     {
-      "source": "/api/:path*/",
-      "destination": "https://todo-api-fmho.onrender.com/:path*/"
-    },
-    { "source": "/(.*)", "destination": "/" }
+      "source": "/(.*)",
+      "destination": "/"
+    }
   ]
 }
