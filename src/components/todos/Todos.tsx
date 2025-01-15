@@ -1,18 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchTodos } from "@/lib/constants";
-import AddTodo from "./AddTodo";
-import EditTodo from "./EditTodo";
+import { fetchTodos, Todo } from "@/lib/constants";
 import { SquareCheck } from "lucide-react";
+import { apiFetch } from "@/lib/api";
+import EditTodo from "./EditTodo";
+import AddTodo from "./AddTodo";
 
-export interface Todo {
-  todo_id: number;
-  title: string;
-  body: string;
-  done: boolean;
-}
-
-const Todo = ({ activeListId }: { activeListId: number }) => {
+const Todos = ({ itemId }: { itemId: number }) => {
   const queryClient = useQueryClient();
 
   const {
@@ -20,49 +14,52 @@ const Todo = ({ activeListId }: { activeListId: number }) => {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["todos", activeListId],
-    queryFn: () => fetchTodos(activeListId),
-    enabled: !!activeListId,
+    queryKey: ["todos", itemId],
+    queryFn: () => fetchTodos(itemId),
+    enabled: !!itemId,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
-  const markTodoAsDone = useMutation<void, Error, number>({
+  const markTodoAsDone = useMutation<
+    void,
+    Error,
+    number,
+    { previousTodos: Todo[] | undefined }
+  >({
     mutationFn: (todo_id: number) =>
-      fetch(
-        `${
-          import.meta.env.VITE_BASE_URL
-        }/api/lists/${activeListId}/todos/${todo_id}/done`,
-        {
-          method: "PATCH",
-        }
-      ).then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to mark todo as done");
-        }
+      apiFetch(`/api/items/${itemId}/todos/${todo_id}/done`, {
+        method: "PATCH",
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos", activeListId] });
+    onMutate: async (todo_id) => {
+      await queryClient.cancelQueries({ queryKey: ["todos", itemId] });
+
+      const previousTodos = queryClient.getQueryData<Todo[]>(["todos", itemId]);
+
+      queryClient.setQueryData<Todo[]>(["todos", itemId], (oldTodos) =>
+        oldTodos?.map((todo) =>
+          todo.todo_id === todo_id ? { ...todo, done: true } : todo
+        )
+      );
+
+      return { previousTodos };
     },
-    onError: (error) => {
-      console.error("Error marking todo as done:", error.message);
+    onError: (_err, _todo_id, context) => {
+      queryClient.setQueryData(["todos", itemId], context?.previousTodos);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos", itemId] });
     },
   });
 
   const deleteTodo = useMutation<void, Error, number>({
     mutationFn: (todo_id: number) =>
-      fetch(
-        `${
-          import.meta.env.VITE_BASE_URL
-        }/api/lists/${activeListId}/todos/${todo_id}`,
-        {
-          method: "DELETE",
-        }
-      ).then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to delete todo");
-        }
+      apiFetch(`/api/items/${itemId}/todos/${todo_id}`, {
+        method: "DELETE",
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos", activeListId] });
+      queryClient.invalidateQueries({ queryKey: ["todos", itemId] });
     },
     onError: (error) => {
       console.error("Error deleting todo:", error.message);
@@ -97,7 +94,7 @@ const Todo = ({ activeListId }: { activeListId: number }) => {
                   {todo.title}
                 </div>
                 <div className="flex gap-4">
-                  <EditTodo todo={todo} activeListId={activeListId} />
+                  <EditTodo todo={todo} itemId={itemId} />
                   <Button
                     onClick={() => deleteTodo.mutate(todo.todo_id)}
                     className="bg-red-500"
@@ -110,9 +107,9 @@ const Todo = ({ activeListId }: { activeListId: number }) => {
           : null}
       </ul>
 
-      <AddTodo activeListId={activeListId} />
+      <AddTodo itemId={itemId} />
     </div>
   );
 };
 
-export default Todo;
+export default Todos;

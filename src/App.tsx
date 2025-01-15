@@ -1,10 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import GoogleLoginButton from "./components/GoogleLoginButton";
-import ListDetail from "./components/ListDetail";
-import Home from "./components/Home";
+import GoogleLoginButton from "./components/auth/GoogleLoginButton";
 import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import ItemPage from "./components/items/ItemPage";
+import Items from "./components/items/Items";
 
 const queryClient = new QueryClient();
 
@@ -19,15 +19,15 @@ const App = () => {
               path="/"
               element={
                 <ProtectedRoute>
-                  <Home />
+                  <Items />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/list/:listId"
+              path="/item/:itemId"
               element={
                 <ProtectedRoute>
-                  <ListDetail />
+                  <ItemPage />
                 </ProtectedRoute>
               }
             />

@@ -19,5 +19,10 @@ export const apiFetch = async (endpoint: string, options: RequestInit = {}) => {
     throw new Error(`API error: ${response.status} - ${errorText}`);
   }
 
-  return response.json();
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  return null;
 };

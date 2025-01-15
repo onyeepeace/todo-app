@@ -1,6 +1,6 @@
 import { useGoogleLogin } from "@react-oauth/google";
-import { Button } from "./ui/button";
-import { useAuth } from "../context/AuthContext";
+import { Button } from "../ui/button";
+import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const GoogleLoginButton = () => {
@@ -35,7 +35,11 @@ const GoogleLoginButton = () => {
     },
   });
 
-  return <Button onClick={() => googleLogin()}>Login with Google</Button>;
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <Button onClick={() => googleLogin()}>Login with Google</Button>
+    </div>
+  );
 };
 
 export default GoogleLoginButton;

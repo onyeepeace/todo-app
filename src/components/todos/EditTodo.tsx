@@ -13,20 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Todo } from "./Todo";
+import { Todo } from "@/lib/constants";
+import { apiFetch } from "@/lib/api";
 
 type FormData = {
   title: string;
   body: string;
 };
 
-const EditTodo = ({
-  todo,
-  activeListId,
-}: {
-  todo: Todo;
-  activeListId: number;
-}) => {
+const EditTodo = ({ todo, itemId }: { todo: Todo; itemId: number }) => {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { register, handleSubmit } = useForm({
@@ -38,27 +33,13 @@ const EditTodo = ({
 
   const updateTodo = useMutation({
     mutationFn: async (values: { title: string; body: string }) => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/lists/${activeListId}/todos/${
-          todo.todo_id
-        }`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to edit todo");
-      }
-
-      return response.json();
+      return apiFetch(`/api/items/${itemId}/todos/${todo.todo_id}`, {
+        method: "PUT",
+        body: JSON.stringify(values),
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos", activeListId] });
+      queryClient.invalidateQueries({ queryKey: ["todos", itemId] });
       setIsOpen(false);
     },
     onError: (error) => {

@@ -1,19 +1,19 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { fetchListById } from "@/lib/constants";
-import SharedTodo from "./SharedTodo";
+import { fetchItemById } from "@/lib/constants";
+import SharedItem from "./SharedItem";
 
 const ListDetail = () => {
-  const { listId } = useParams<{ listId: string }>();
+  const { itemId } = useParams<{ itemId: string }>();
 
   const {
     data: list,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["list", listId],
-    queryFn: () => fetchListById(Number(listId)),
-    enabled: !!listId,
+    queryKey: ["item", itemId],
+    queryFn: () => fetchItemById(Number(itemId)),
+    enabled: !!itemId,
   });
 
   if (isLoading) return <p>Loading list details...</p>;
@@ -31,7 +31,7 @@ const ListDetail = () => {
         </div>
       </div>
       <div className="w-2/3 bg-blue-100 p-4 border-2 border-gray-800 rounded-3xl">
-        <SharedTodo activeListId={Number(listId)} />
+        <SharedItem activeItemId={Number(itemId)} />
       </div>
     </div>
   );

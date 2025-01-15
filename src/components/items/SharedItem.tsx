@@ -9,15 +9,15 @@ export interface Todo {
   done: boolean;
 }
 
-const SharedTodo = ({ activeListId }: { activeListId: number }) => {
+const SharedItem = ({ activeItemId }: { activeItemId: number }) => {
   const {
     data: todos,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["todos", activeListId],
-    queryFn: () => fetchTodos(activeListId),
-    enabled: !!activeListId,
+    queryKey: ["todos", activeItemId],
+    queryFn: () => fetchTodos(activeItemId),
+    enabled: !!activeItemId,
   });
 
   if (isLoading) {
@@ -53,4 +53,4 @@ const SharedTodo = ({ activeListId }: { activeListId: number }) => {
   );
 };
 
-export default SharedTodo;
+export default SharedItem;

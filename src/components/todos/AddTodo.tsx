@@ -14,39 +14,27 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 
 type FormData = {
   title: string;
   body: string;
 };
 
-const AddTodo = ({ activeListId }: { activeListId: number }) => {
+const AddTodo = ({ itemId }: { itemId: number }) => {
   const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
   const { register, handleSubmit, reset } = useForm<FormData>();
 
   const createTodo = useMutation({
     mutationFn: async (values: FormData) => {
-      const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/api/lists/${activeListId}/todos`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to create todo");
-      }
-
-      const responseBody = await response.text();
-      return responseBody ? JSON.parse(responseBody) : {};
+      return apiFetch(`/api/items/${itemId}/todos`, {
+        method: "POST",
+        body: JSON.stringify(values),
+      });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos", activeListId] });
+      queryClient.invalidateQueries({ queryKey: ["todos", itemId] });
       reset();
       setIsOpen(false);
     },
