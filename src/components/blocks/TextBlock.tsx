@@ -16,10 +16,16 @@ const TextBlock = ({
     editor: ReactQuill.UnprivilegedEditor
   ) => {
     const newDelta = editor.getContents();
+    console.log(content, delta, source, editor);
     onChange(newDelta);
   };
 
-  return <ReactQuill value={data} onChange={handleChange} />;
+  return (
+    <ReactQuill
+      value={typeof data === "string" ? data : data.ops}
+      onChange={handleChange}
+    />
+  );
 };
 
 export default TextBlock;
