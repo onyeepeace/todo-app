@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,7 +17,6 @@ import { apiFetch } from "@/lib/api";
 
 type FormData = {
   title: string;
-  body: string;
 };
 
 const EditTodo = ({ todo, itemId }: { todo: Todo; itemId: number }) => {
@@ -27,12 +25,11 @@ const EditTodo = ({ todo, itemId }: { todo: Todo; itemId: number }) => {
   const { register, handleSubmit } = useForm({
     defaultValues: {
       title: todo.title,
-      body: todo.body,
     },
   });
 
   const updateTodo = useMutation({
-    mutationFn: async (values: { title: string; body: string }) => {
+    mutationFn: async (values: { title: string }) => {
       return apiFetch(`/api/items/${itemId}/todos/${todo.todo_id}`, {
         method: "PUT",
         body: JSON.stringify(values),
@@ -66,14 +63,6 @@ const EditTodo = ({ todo, itemId }: { todo: Todo; itemId: number }) => {
                 required
                 placeholder="Edit the title"
                 {...register("title")}
-              />
-            </div>
-            <div className="mb-4">
-              <Label htmlFor="body">Body</Label>
-              <Textarea
-                required
-                placeholder="Edit the description"
-                {...register("body")}
               />
             </div>
             <DialogFooter>

@@ -9,7 +9,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,7 +17,6 @@ import { apiFetch } from "@/lib/api";
 
 type FormData = {
   title: string;
-  body: string;
 };
 
 const AddTodo = ({ itemId }: { itemId: number }) => {
@@ -62,14 +60,6 @@ const AddTodo = ({ itemId }: { itemId: number }) => {
                 required
                 placeholder="What do you want to do?"
                 {...register("title")}
-              />
-            </div>
-            <div className="mb-4">
-              <Label htmlFor="body">Body</Label>
-              <Textarea
-                required
-                placeholder="Tell me more..."
-                {...register("body")}
               />
             </div>
             <DialogFooter>

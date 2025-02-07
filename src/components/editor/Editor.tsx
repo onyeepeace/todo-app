@@ -1,42 +1,37 @@
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, JSONContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useCallback, useEffect } from "react";
-import { TextBlock as TextBlockType } from "@/lib/constants";
 
-const TextBlock = ({
-  block,
+const Editor = ({
+  content,
   onChange,
   readOnly = false,
 }: {
-  block: TextBlockType;
-  onChange: (newBlock: TextBlockType) => void;
+  content: JSONContent | string;
+  onChange: (newContent: JSONContent) => void;
   readOnly?: boolean;
 }) => {
   const editor = useEditor({
     extensions: [StarterKit],
-    content: block.content || "<p>Start typing...</p>",
-    editable: true,
+    content:
+      typeof content === "string"
+        ? content
+        : content || { type: "doc", content: [{ type: "paragraph" }] },
+    editable: !readOnly,
     autofocus: "end",
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange({
-        ...block,
-        content: html,
-      });
+      onChange(editor.getJSON());
     },
   });
 
   useEffect(() => {
-    if (editor) {
-      editor.setEditable(!readOnly);
+    if (editor && content) {
+      const newContent = typeof content === "string" ? content : content;
+      if (JSON.stringify(newContent) !== JSON.stringify(editor.getJSON())) {
+        editor.commands.setContent(newContent);
+      }
     }
-  }, [editor, readOnly]);
-
-  useEffect(() => {
-    if (editor && block.content && block.content !== editor.getHTML()) {
-      editor.commands.setContent(block.content);
-    }
-  }, [block.content, editor]);
+  }, [content, editor]);
 
   const MenuBar = useCallback(() => {
     if (!editor || readOnly) {
@@ -153,7 +148,7 @@ const TextBlock = ({
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-white">
+    <>
       <MenuBar />
       <div
         className="p-4 min-h-[200px] focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-opacity-50"
@@ -161,8 +156,8 @@ const TextBlock = ({
       >
         <EditorContent editor={editor} />
       </div>
-    </div>
+    </>
   );
 };
 
-export default TextBlock;
+export default Editor;

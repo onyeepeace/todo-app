@@ -1,48 +1,41 @@
 import { apiFetch } from "./api";
-import { Delta } from "quill";
+import { JSONContent } from "@tiptap/react";
 
-export interface TextBlock {
+export interface BaseBlock {
   id: string;
+  type: string;
+}
+
+export interface TextBlock extends BaseBlock {
   type: "text";
-  data: {
-    delta: Delta;
-  };
+  content: string;
 }
 
-export interface ChecklistBlock {
-  id: string;
-  type: "checklist";
-  data: {
-    items: {
-      id: string;
-      text: string;
-      done: boolean;
-    }[];
-  };
-}
-
-export interface ImageBlock {
-  id: string;
+export interface ImageBlock extends BaseBlock {
   type: "image";
-  data: {
-    url: string;
-    alt?: string;
-  };
+  url: string;
+  alt?: string;
 }
+
+export type ContentBlock = TextBlock | ImageBlock;
 
 export interface Todo {
   todo_id: number;
   title: string;
-  body: string;
   done: boolean;
 }
-
-export type ContentBlock = TextBlock | ChecklistBlock | ImageBlock;
 
 export interface Item {
   item_id: number;
   name: string;
-  content: ContentBlock[];
+  content: JSONContent;
+  role: "viewer" | "editor" | "owner";
+  version: number;
+}
+
+export interface ApiError extends Error {
+  message: string;
+  status?: number;
 }
 
 export const fetchItems = async (): Promise<Item[]> => {
@@ -50,10 +43,14 @@ export const fetchItems = async (): Promise<Item[]> => {
 };
 
 export const fetchItemById = async (itemId: number): Promise<Item> => {
-  return apiFetch(`/api/items/${itemId}`);
+  const response = await apiFetch(`/api/items/${itemId}`);
+  return {
+    ...response,
+    role: response.role || "owner",
+  };
 };
 
-export const addItem = async (name: string, content: ContentBlock[]) => {
+export const addItem = async (name: string, content: JSONContent) => {
   return apiFetch("/api/items", {
     method: "POST",
     body: JSON.stringify({ name, content }),
@@ -67,11 +64,12 @@ export const fetchTodos = async (itemId: number): Promise<Todo[]> => {
 export const editItem = async (
   itemId: number,
   name: string,
-  content: ContentBlock[]
+  content: JSONContent,
+  version: number
 ) => {
   return apiFetch(`/api/items/${itemId}`, {
     method: "PUT",
-    body: JSON.stringify({ name, content }),
+    body: JSON.stringify({ name, content, version }),
   });
 };
 
@@ -79,4 +77,19 @@ export const deleteItem = async (itemId: number) => {
   return apiFetch(`/api/items/${itemId}`, {
     method: "DELETE",
   });
+};
+
+export const shareItem = async (
+  itemId: number,
+  userId: number,
+  role: "editor" | "viewer"
+) => {
+  return apiFetch(`/api/items/${itemId}/share`, {
+    method: "POST",
+    body: JSON.stringify({ user_id: userId, role }),
+  });
+};
+
+export const lookupUser = async (email: string) => {
+  return apiFetch(`/api/users/lookup?email=${email}`);
 };

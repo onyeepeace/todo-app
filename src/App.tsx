@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ItemPage from "./components/items/ItemPage";
 import Items from "./components/items/Items";
+import { Toaster } from "sonner";
 
 const queryClient = new QueryClient();
 
@@ -12,6 +13,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <Toaster position="top-right" richColors />
         <Router>
           <Routes>
             <Route path="/login" element={<GoogleLoginButton />} />

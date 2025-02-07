@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 import tailwindcssAnimate from "tailwindcss-animate";
+
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
@@ -52,7 +53,29 @@ export default {
           5: "hsl(var(--chart-5))",
         },
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            maxWidth: "none",
+            p: {
+              marginTop: "0.5em",
+              marginBottom: "0.5em",
+            },
+            "p:first-child": {
+              marginTop: "0",
+            },
+            "p:last-child": {
+              marginBottom: "0",
+            },
+          },
+        },
+      },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [
+    tailwindcssAnimate,
+    require("@tailwindcss/typography")({
+      target: "modern",
+    }),
+  ],
 };
