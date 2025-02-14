@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import Todos from "../todos/Todos";
 import { JSONContent } from "@tiptap/react";
 import { toast } from "sonner";
+import ShareDialog from "./ShareDialog";
 
 const ItemPage = () => {
   const { itemId } = useParams<{ itemId: string }>();
@@ -48,7 +49,6 @@ const ItemPage = () => {
       setTimeout(() => setShowSavedPrompt(false), 3000);
     },
     onError: (error: ApiError) => {
-      console.log("Save error:", error);
       if (
         error.message.includes("409") ||
         error.message.includes("modified by another user")
@@ -75,7 +75,8 @@ const ItemPage = () => {
     }
   };
 
-  const canEdit = true;
+  const userRole = item?.role || "viewer";
+  const canEdit = userRole === "owner" || userRole === "editor";
 
   if (isLoading) return <p>Loading item...</p>;
   if (isError) return <p>Error loading item. Please try again later.</p>;
@@ -84,13 +85,14 @@ const ItemPage = () => {
     <div className="p-8 max-w-lg mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold">{item?.name}</h2>
+        {userRole === "owner" && <ShareDialog itemId={Number(itemId)} />}
       </div>
       <ItemContent
         content={content}
         onChange={setContent}
         readOnly={!canEdit}
       />
-      <Todos itemId={Number(itemId)} />
+      <Todos itemId={Number(itemId)} role={userRole} />
       {canEdit && (
         <button
           onClick={handleSave}

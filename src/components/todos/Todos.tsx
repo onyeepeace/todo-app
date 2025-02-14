@@ -6,8 +6,15 @@ import { apiFetch } from "@/lib/api";
 import EditTodo from "./EditTodo";
 import AddTodo from "./AddTodo";
 
-const Todos = ({ itemId }: { itemId: number }) => {
+const Todos = ({
+  itemId,
+  role,
+}: {
+  itemId: number;
+  role: "viewer" | "editor" | "owner";
+}) => {
   const queryClient = useQueryClient();
+  const canModify = role === "owner" || role === "editor";
 
   const {
     data: todos,
@@ -87,27 +94,39 @@ const Todos = ({ itemId }: { itemId: number }) => {
                   {todo.done ? (
                     <SquareCheck className="text-teal-500 size-9" />
                   ) : (
-                    <span onClick={() => markTodoAsDone.mutate(todo.todo_id)}>
-                      <SquareCheck className="text-gray-500 cursor-pointer size-9" />
+                    <span
+                      onClick={() =>
+                        canModify && markTodoAsDone.mutate(todo.todo_id)
+                      }
+                    >
+                      <SquareCheck
+                        className={`size-9 ${
+                          canModify
+                            ? "text-gray-500 cursor-pointer"
+                            : "text-gray-300"
+                        }`}
+                      />
                     </span>
                   )}
                   {todo.title}
                 </div>
-                <div className="flex gap-4">
-                  <EditTodo todo={todo} itemId={itemId} />
-                  <Button
-                    onClick={() => deleteTodo.mutate(todo.todo_id)}
-                    className="bg-red-500"
-                  >
-                    Delete
-                  </Button>
-                </div>
+                {canModify && (
+                  <div className="flex gap-4">
+                    <EditTodo todo={todo} itemId={itemId} />
+                    <Button
+                      onClick={() => deleteTodo.mutate(todo.todo_id)}
+                      className="bg-red-500"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                )}
               </li>
             ))
           : null}
       </ul>
 
-      <AddTodo itemId={itemId} />
+      {canModify && <AddTodo itemId={itemId} />}
     </div>
   );
 };

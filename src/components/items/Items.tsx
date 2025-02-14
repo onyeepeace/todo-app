@@ -7,7 +7,6 @@ import {
   deleteItem,
 } from "@/lib/constants";
 import { Link } from "react-router-dom";
-import LogoutButton from "../auth/LogoutButton";
 import { Button } from "@/components/ui/button";
 import { JSONContent } from "@tiptap/react";
 
@@ -94,9 +93,27 @@ const Items = () => {
 
   if (isLoading) return <p>Loading items...</p>;
 
-  const ItemList = ({ items, title }: { items: Item[]; title: string }) => (
+  const ItemList = ({
+    items,
+    title,
+    showAddButton,
+  }: {
+    items: Item[];
+    title: string;
+    showAddButton?: boolean;
+  }) => (
     <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">{title}</h2>
+        {showAddButton && (
+          <Button
+            onClick={handleAddItem}
+            className="bg-blue-500 hover:bg-blue-600"
+          >
+            Add New Item
+          </Button>
+        )}
+      </div>
       {items.length === 0 ? (
         <p className="text-gray-500 italic">No items found</p>
       ) : (
@@ -147,20 +164,7 @@ const Items = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="w-full max-w-3xl mx-auto bg-white rounded-xl shadow-sm p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold">Jot It</h1>
-          <div className="flex gap-4">
-            <Button
-              onClick={handleAddItem}
-              className="bg-blue-500 hover:bg-blue-600"
-            >
-              Add New Item
-            </Button>
-            <LogoutButton />
-          </div>
-        </div>
-
-        <ItemList items={privateItems} title="My Items" />
+        <ItemList items={privateItems} title="My Items" showAddButton={true} />
         <ItemList items={sharedItems} title="Shared with me" />
       </div>
     </div>
