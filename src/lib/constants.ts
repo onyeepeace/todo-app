@@ -30,7 +30,7 @@ export interface Item {
   name: string;
   content: JSONContent;
   role: "viewer" | "editor" | "owner";
-  version: number;
+  etag?: string;
 }
 
 export interface ApiError extends Error {
@@ -38,23 +38,65 @@ export interface ApiError extends Error {
   status?: number;
 }
 
+interface ApiResponse<T> {
+  data: T;
+  etag: string;
+}
+
 export const fetchItems = async (): Promise<Item[]> => {
-  return apiFetch("/api/items");
+  const response = await apiFetch("/api/items");
+  if ("data" in response) {
+    const apiResponse = response as ApiResponse<Omit<Item, "etag">[]>;
+    return apiResponse.data.map((item) => ({
+      ...item,
+      role: item.role || "owner",
+      etag: apiResponse.etag,
+    }));
+  }
+  // Handle legacy response format
+  return response;
 };
 
 export const fetchItemById = async (itemId: number): Promise<Item> => {
   const response = await apiFetch(`/api/items/${itemId}`);
+
+  // Check if we have a data property
+  if ("data" in response) {
+    // Even if we don't have an etag, we should still return the data
+    const item = {
+      ...response.data,
+      role: response.data.role || "owner",
+      etag: response.etag || response.data.etag, // Try both locations
+    };
+    return item;
+  }
+
+  // Handle legacy response format
   return {
     ...response,
     role: response.role || "owner",
+    etag: response.etag, // Try to get etag from root level
   };
 };
 
-export const addItem = async (name: string, content: JSONContent) => {
-  return apiFetch("/api/items", {
+export const addItem = async (
+  name: string,
+  content: JSONContent
+): Promise<Item> => {
+  const response = await apiFetch("/api/items", {
     method: "POST",
     body: JSON.stringify({ name, content }),
   });
+  if ("data" in response) {
+    const apiResponse = response as ApiResponse<Omit<Item, "etag">>;
+    return {
+      ...apiResponse.data,
+      role: apiResponse.data.role || "owner",
+      etag: apiResponse.etag,
+    };
+  }
+  // Handle legacy response format
+  return response;
 };
 
 export const fetchTodos = async (itemId: number): Promise<Todo[]> => {
@@ -65,12 +107,23 @@ export const editItem = async (
   itemId: number,
   name: string,
   content: JSONContent,
-  version: number
-) => {
-  return apiFetch(`/api/items/${itemId}`, {
+  etag: string
+): Promise<Item> => {
+  const response = await apiFetch(`/api/items/${itemId}`, {
     method: "PUT",
-    body: JSON.stringify({ name, content, version }),
+    body: JSON.stringify({ name, content }),
+    etag,
   });
+  if ("data" in response) {
+    const apiResponse = response as ApiResponse<Omit<Item, "etag">>;
+    return {
+      ...apiResponse.data,
+      role: apiResponse.data.role || "owner",
+      etag: apiResponse.etag,
+    };
+  }
+  // Handle legacy response format
+  return response;
 };
 
 export const deleteItem = async (itemId: number) => {
@@ -84,10 +137,11 @@ export const shareItem = async (
   userId: number,
   role: "editor" | "viewer"
 ) => {
-  return apiFetch(`/api/items/${itemId}/share`, {
+  const response = await apiFetch(`/api/items/${itemId}/share`, {
     method: "POST",
     body: JSON.stringify({ user_id: userId, role }),
   });
+  return response.data;
 };
 
 export const lookupUser = async (email: string) => {

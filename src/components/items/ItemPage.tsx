@@ -38,9 +38,9 @@ const ItemPage = () => {
   }, [item]);
 
   const editItemMutation = useMutation({
-    mutationFn: (params: { content: JSONContent; version: number }) =>
+    mutationFn: (params: { content: JSONContent; etag: string }) =>
       item
-        ? editItem(Number(itemId), item.name, params.content, params.version)
+        ? editItem(Number(itemId), item.name, params.content, params.etag)
         : Promise.reject(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["item", itemId] });
@@ -50,11 +50,11 @@ const ItemPage = () => {
     },
     onError: (error: ApiError) => {
       if (
-        error.message.includes("409") ||
-        error.message.includes("modified by another user")
+        error.message.includes("412") ||
+        error.message.includes("precondition failed")
       ) {
         toast.error(
-          "This document has been modified by someone else. Refreshing with latest version...",
+          "This document has been modified by someone else. Refresh with latest version...",
           {
             duration: 4000,
           }
@@ -67,12 +67,18 @@ const ItemPage = () => {
   });
 
   const handleSave = () => {
-    if (itemId && item) {
-      editItemMutation.mutate({
-        content,
-        version: item.version,
-      });
+    if (!itemId || !item) {
+      toast.error("Unable to save: missing item data");
+      return;
     }
+    if (!item.etag) {
+      toast.error("Unable to save: missing version information");
+      return;
+    }
+    editItemMutation.mutate({
+      content,
+      etag: item.etag,
+    });
   };
 
   const userRole = item?.role || "viewer";
@@ -96,7 +102,12 @@ const ItemPage = () => {
       {canEdit && (
         <button
           onClick={handleSave}
-          className="mt-4 p-2 bg-blue-500 text-white rounded"
+          disabled={!item?.etag}
+          className={`mt-4 p-2 text-white rounded ${
+            item?.etag
+              ? "bg-blue-500 hover:bg-blue-600"
+              : "bg-gray-400 cursor-not-allowed"
+          }`}
         >
           Save
         </button>

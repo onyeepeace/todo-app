@@ -56,13 +56,16 @@ const Items = () => {
     if (newName) {
       const itemToEdit = items?.find((item) => item.item_id === itemId);
       if (itemToEdit) {
-        editItem(itemId, newName, itemToEdit.content, itemToEdit.version)
+        editItem(itemId, newName, itemToEdit.content, itemToEdit.etag!)
           .then(() => {
             queryClient.invalidateQueries({ queryKey: ["items"] });
           })
           .catch((error) => {
             console.error("Error editing item:", error.message);
-            if (error.message.includes("version conflict")) {
+            if (
+              error.message.includes("412") ||
+              error.message.includes("precondition failed")
+            ) {
               alert(
                 "This item has been modified by someone else. Please refresh and try again."
               );
